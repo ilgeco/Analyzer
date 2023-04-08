@@ -62,7 +62,6 @@ impl CreateSeries<str, f64, IdList> for IdListBuilder {
         let mut ret = IdList::new();
 
         for cap in RE.captures_iter(input) {
-            println!("{:?}", cap);
             match (cap.get(1), cap.get(2)) {
                 (None, Some(x)) => {
                     let s_num = x.as_str();

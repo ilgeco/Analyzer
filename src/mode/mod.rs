@@ -15,7 +15,6 @@ pub fn dispatch(mut command: Option<cli::Commands>){
         Commands::Avg { file1 } => handle_avg(file1),
         Commands::Cmp { file1, file2 } =>  handle_cmp(file1.as_path(), file2.as_path()),
     }
-    todo!()
 }
 
 fn handle_cmp(file1: &Path, file2: &Path) {
@@ -43,7 +42,7 @@ fn handle_cmp(file1: &Path, file2: &Path) {
            }
            if size_r != 0 && size_e != 0{
 
-           println!("{}, {}, {}",name, tot_rel/size_r as f64 ,tot_err/size_e as f64);
+           println!("{}, {:e}, {:e}",name, tot_rel/size_r as f64 ,tot_err/size_e as f64);
         }
 
         }
@@ -58,7 +57,7 @@ fn handle_avg(file1: Option<std::path::PathBuf>) {
 
     for series in series.iter() {
         let avg = series.1.iter().sum::<f64>() / series.1.len() as f64;
-        println!("{} -> {}", series.0, avg)
+        println!("{} -> {:e}", series.0, avg)
 
     }
 }
@@ -70,14 +69,14 @@ fn handle_range(file1: Option<std::path::PathBuf>) {
     let range_finder = |(ml,zl,bl) : (f64, f64, f64), (mr,zr, br) : (f64, f64, f64) | {
         let min = ml.min(mr);
         let zero = if (zl - 0.0).abs() > (zr - 0.0).abs() {zr} else {zl};
-        let max = bl.min(br);
+        let max = bl.max(br);
         return (min, zero, max)
     };
 
     for series in series.iter() {
         let range = series.1.iter().map(|&x| (x,x,x)).reduce(range_finder);
         if let Some((min, zero, max)) = range {
-            println!("{} -> ({}, {} ,{})", series.0, min, zero, max)
+            println!("{} -> ({:e}, {:e} ,{:e})", series.0, min, zero, max)
         }        
     }
 }

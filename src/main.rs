@@ -13,5 +13,4 @@ mod util;
 fn main() {
     let cli = Cli::parse();
     dispatch(cli.command);
-    println!("Hello, world!");
 }
