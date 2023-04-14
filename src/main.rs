@@ -1,9 +1,14 @@
+#![feature(test)]
+extern crate test;
+
+#[macro_use]
+extern crate lazy_static;
+
+
 use clap::Parser;
 
 use crate::{cli::Cli, mode::dispatch};
 
-#[macro_use]
-extern crate lazy_static;
 
 mod cli;
 mod input_parser;

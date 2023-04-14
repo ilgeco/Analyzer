@@ -12,10 +12,10 @@ use std::{path::Path, fs, process::exit, io::{ErrorKind, Read}};
 pub fn retrive_file(file_name: impl AsRef<Path>) -> String {
     match fs::read_to_string(&file_name) {
         Ok(x) => x,
-        Err(_) => {
+        Err(p) => {
             eprintln!(
                 "{}",
-                format!("File {} not found", file_name.as_ref().to_str().unwrap())
+                format!("File {} not found {:?}", file_name.as_ref().to_str().unwrap(), p)
             );
             exit(-1)
         }

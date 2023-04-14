@@ -1,10 +1,15 @@
-use std::{borrow::Borrow, collections::HashMap};
 
-use regex::Regex;
+
+use std::{borrow::Borrow, collections::HashMap};
+pub mod id_regex_builder;
+pub mod id_nom_builder;
+
 
 
 pub trait Series<K: ?Sized, T> {
-    type Iter<'a>: Iterator where Self: 'a;
+    type Iter<'a>: Iterator
+    where
+        Self: 'a;
     fn get_serie(&self, input: &K) -> Option<&Vec<T>>;
     fn iter(&self) -> Self::Iter<'_>;
 }
@@ -51,33 +56,7 @@ impl Series<str, f64> for IdList {
     }
 }
 
-pub struct IdListBuilder;
 
-impl CreateSeries<str, f64, IdList> for IdListBuilder {
-    fn create_series(input: &str) -> IdList {
-        lazy_static! {
-            static ref RE: Regex =
-                Regex::new(r"(?m)(?:(\S+):|^\s*)[ \t]*(-?[0-9]+(?:\.[0-9]*)?)").unwrap();
-        }
-        let mut ret = IdList::new();
-
-        for cap in RE.captures_iter(input) {
-            match (cap.get(1), cap.get(2)) {
-                (None, Some(x)) => {
-                    let s_num = x.as_str();
-                    ret.push("", s_num.parse().unwrap());
-                }
-                (Some(y), Some(x)) => {
-                    let id = y.as_str();
-                    let s_num = x.as_str();
-                    ret.push(id, s_num.parse().unwrap());
-                }
-                _ => panic!("Come ci sei riuscito?"),
-            }
-        }
-        ret
-    }
-}
 
 pub fn parse<R: CreateSeries<K, T, Q>, K, T, Q>(input: &str, _: R) -> Q
 where
@@ -87,15 +66,14 @@ where
     R::create_series(input)
 }
 
-
-
 #[cfg(test)]
-mod test {
+mod tests {
     use std::path::Path;
 
-    use crate::util::retrive_file;
+    use crate::util::{retrive_file, retrive_string};
+    use test::Bencher;
 
-    use super::*;
+    use super::{*, id_regex_builder::IdRegexListBuilder, id_nom_builder::IdNomListBuilder};
 
     #[cfg(test)]
     #[allow(dead_code)]
@@ -109,7 +87,7 @@ mod test {
     }
 
     #[test]
-    fn simple_test() {
+    fn simple_test_regex() {
         let input = r#"
         aasdw come sfasr nosdfo mmm curl:    23
         casco: 5554
@@ -122,10 +100,48 @@ mod test {
         .
         e qui: 23.4
         "#;
-        let series = IdListBuilder::create_series(&input);
+        let series = IdRegexListBuilder::create_series(&input);
         for i in series.series.iter() {
             println!("{:?}", i);
         }
     }
 
+
+    #[test]
+    fn simple_test_num() {
+        let input = r#"
+        aasdw come sfasr nosdfo mmm curl:    23
+        casco: 5554
+        masse c: sscome
+        ciccio: 22
+        ciccio: 33.12345
+        23.2
+        33.2
+        :31.2
+        .
+        e qui: 23.4
+        "#;
+        let series = IdNomListBuilder::create_series(&input);
+        for i in series.series.iter() {
+            println!("{:?}", i);
+        }
+    }
+
+    #[test]
+    fn test_nom() {
+        let string =  retrive_string(Some(Path::new(r"F:\Projects\analyzer\catto.txt")) );
+        parse(&string, IdNomListBuilder);
+    }
+
+    #[bench]
+    fn bench_nom(b: &mut Bencher) {
+       let string =  retrive_string(Some(Path::new(r"F:\Projects\analyzer\catto.txt")));
+        b.iter(|| parse(&string, IdNomListBuilder));
+    }
+
+    #[bench]
+    fn bench_reg(b: &mut Bencher) {
+       let string =  retrive_string(Some(Path::new(r"F:\Projects\analyzer\catto.txt")));
+        b.iter(|| parse(&string, IdRegexListBuilder));
+    }
 }
