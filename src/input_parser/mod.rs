@@ -127,21 +127,4 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_nom() {
-        let string =  retrive_string(Some(Path::new(r"F:\Projects\analyzer\catto.txt")) );
-        parse(&string, IdNomListBuilder);
-    }
-
-    #[bench]
-    fn bench_nom(b: &mut Bencher) {
-       let string =  retrive_string(Some(Path::new(r"F:\Projects\analyzer\catto.txt")));
-        b.iter(|| parse(&string, IdNomListBuilder));
-    }
-
-    #[bench]
-    fn bench_reg(b: &mut Bencher) {
-       let string =  retrive_string(Some(Path::new(r"F:\Projects\analyzer\catto.txt")));
-        b.iter(|| parse(&string, IdRegexListBuilder));
-    }
 }

@@ -91,9 +91,20 @@ mod tests{
 
     use super::*;
     #[test]
-    fn simple_num(){
-        let i = PathBuf::from_str(r"F:\Projects\analyzer\catto.txt").unwrap();
-        handle_range(Some(i));
+    fn crash_1(){
+        let data = ":";
+        parse(&data, IdNomListBuilder);
+    }
+    
+    #[test]
+    fn crash_2(){
+        let data = "9 0E ";
+        parse(&data, IdNomListBuilder);
     }
 
+    #[test]
+    fn crash_3(){
+        let data = "9@\n:";
+        parse(&data, IdNomListBuilder);
+    }
 }

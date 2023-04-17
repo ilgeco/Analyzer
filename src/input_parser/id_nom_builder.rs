@@ -62,8 +62,8 @@ fn get_next_id_number(mut i: &str) -> IResult<&str, Option<(&str, f64)>> {
             Ok((i, o)) => return Ok((i, Some(o))),
             Err(x) => match x {
                 nom::Err::Incomplete(_) => return Ok((i, None)),
-                nom::Err::Error(e) => i = &e.input[1..],
-                nom::Err::Failure(_) => panic!("parser panic oh god"),
+                nom::Err::Error(e) | nom::Err::Failure(e) => if e.input.len() > 0 { i = &e.input[1..]} else { return Ok((i,None))},
+                
             },
         }
     }
