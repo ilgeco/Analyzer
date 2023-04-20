@@ -1,11 +1,15 @@
 use std::{ops::Sub, path::Path};
 
+use handle_range::handle_range;
+
 use crate::{
     cli::{self, Commands},
     input_parser::{parse, Series, id_nom_builder::IdNomListBuilder},
     util::{retrive_file, retrive_string},
+
 };
 
+mod handle_range;
 
 pub fn dispatch(mut command: Option<cli::Commands>) {
     if let None = command {
@@ -61,28 +65,6 @@ fn handle_avg(file1: Option<std::path::PathBuf>) {
     }
 }
 
-fn handle_range(file1: Option<std::path::PathBuf>) {
-    let input = retrive_string(file1);
-    let series = parse(&input, IdNomListBuilder);
-
-    let range_finder = |(ml, zl, bl): (f64, f64, f64), (mr, zr, br): (f64, f64, f64)| {
-        let min = ml.min(mr);
-        let zero = if (zl - 0.0).abs() > (zr - 0.0).abs() {
-            zr
-        } else {
-            zl
-        };
-        let max = bl.max(br);
-        return (min, zero, max);
-    };
-
-    for series in series.iter() {
-        let range = series.1.iter().map(|&x| (x, x, x)).reduce(range_finder);
-        if let Some((min, zero, max)) = range {
-            println!("{} -> ({:e}, {:e} ,{:e})", series.0, min, zero, max)
-        }
-    }
-}
 
 
 #[cfg(test)]
