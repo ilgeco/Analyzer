@@ -12,7 +12,7 @@ where
     It: Iterator<Item = (&'a String, &'a Vec<Num>)>,
     Num : required_op::Operation<'a> + 'a
 {
-    let mut res = HashMap::new();
+    let mut res = HashMap::with_capacity(100);
 
     for series in iter {
         let avg = series.1.iter().sum::<Num>().divu(series.1.len());

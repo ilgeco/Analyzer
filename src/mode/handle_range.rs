@@ -14,7 +14,8 @@ where
     It: Iterator<Item = (&'a String, &'a Vec<Num>)>,
     Num : required_op::Operation<'a> + 'a
 {
-    let mut res = HashMap::new();
+    let mut res = HashMap::with_capacity(100);
+    
 
     let range_finder = |(ml, zl, bl): (Num, Num, Num), (mr, zr, br): (Num, Num, Num)| {
         let min = ml.min(mr);
