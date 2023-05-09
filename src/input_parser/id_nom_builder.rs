@@ -5,7 +5,7 @@ use nom::{
 use super::{CreateSeries, IdList};
 pub struct IdNomListBuilder;
 
-impl CreateSeries<str, f64, IdList> for IdNomListBuilder {
+impl CreateSeries<String, f64, IdList> for IdNomListBuilder {
     
     fn create_series(mut input: &str) -> IdList {
         let mut res = IdList::new();
@@ -48,7 +48,7 @@ fn find_possible_start(i: &str) -> IResult<&str, PStart<'_>> {
 }
 
 fn try_get_id_number(i: &str) -> IResult<&str, (&str, f64)> {
-    let (i, o) = find_possible_start(i)?;
+    let (_, o) = find_possible_start(i)?;
     let res = match o {
         PStart::Number(num) => ("", get_float(num)?),
         PStart::Column(name, num) => (name, get_float(num)?),

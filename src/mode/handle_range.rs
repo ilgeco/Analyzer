@@ -1,18 +1,25 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, ops};
 
-use crate::{util::retrive_string, input_parser::{parse, id_nom_builder::IdNomListBuilder, Series}};
+use crate::{
+    input_parser::{id_nom_builder::IdNomListBuilder, parse, Series},
+    util::retrive_string,
+};
+
+use super::required_op;
 
 
-fn range_impl<'a, It>(iter : It)
--> HashMap<&'a String, Option<(f64, f64, f64)>> where 
-    It : Iterator<Item = (&'a String, &'a Vec<f64>)>,
+
+fn range_impl<'a, It, Num>(iter: It) -> HashMap<&'a String, Option<(Num, Num, Num)>>
+where
+    It: Iterator<Item = (&'a String, &'a Vec<Num>)>,
+    Num : required_op::Operation<'a> + 'a
 {
-    
     let mut res = HashMap::new();
 
-    let range_finder = |(ml, zl, bl): (f64, f64, f64), (mr, zr, br): (f64, f64, f64)| {
+    let range_finder = |(ml, zl, bl): (Num, Num, Num), (mr, zr, br): (Num, Num, Num)| {
         let min = ml.min(mr);
-        let zero = if (zl - 0.0).abs() > (zr - 0.0).abs() {
+        
+        let zero = if (zl - Num::zero()).abs() > (zr - Num::zero()).abs() {
             zr
         } else {
             zl
@@ -26,16 +33,13 @@ fn range_impl<'a, It>(iter : It)
         res.insert(series.0, range);
     }
     res
-
 }
-
 
 pub fn handle_range(file1: Option<std::path::PathBuf>) {
     let input = retrive_string(file1);
     let series = parse(&input, IdNomListBuilder);
 
-
-    let vals = range_impl(series.iter());
+    let vals = range_impl(series.into_iter());
 
     for val in vals.into_iter() {
         if let Some((min, zero, max)) = val.1 {

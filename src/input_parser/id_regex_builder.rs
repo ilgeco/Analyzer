@@ -3,7 +3,7 @@ use regex::Regex;
 use super::{IdList, CreateSeries};
 pub struct IdRegexListBuilder;
 
-impl CreateSeries<str, f64, IdList> for IdRegexListBuilder {
+impl CreateSeries<String, f64, IdList> for IdRegexListBuilder {
     fn create_series(input: &str) -> IdList {
         lazy_static! {
             static ref RE: Regex =

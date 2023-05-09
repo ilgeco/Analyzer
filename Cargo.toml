@@ -14,9 +14,9 @@ atty = "*"
 nom = "*"
 
 [lib]
-name="analyzer"
+name="libanalyzer"
 path="src/lib.rs"
 
 [[bin]]
-name="libanalyzer"
+name="analyzer"
 path="src/main.rs"

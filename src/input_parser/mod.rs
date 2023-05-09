@@ -1,17 +1,18 @@
-
-
 use std::{borrow::Borrow, collections::HashMap};
-pub mod id_regex_builder;
 pub mod id_nom_builder;
-
-
+pub mod id_regex_builder;
 
 pub trait Series<K: ?Sized, T> {
-    type Iter<'a>: Iterator
+    type IntoIteratorInner<'a>: IntoIterator<Item = &'a T>
+    where Self: 'a, T: 'a, K: 'a; 
+
+    type IntoIterOuter<'a>: IntoIterator<Item = (&'a K, Self::IntoIteratorInner<'a>)>
     where
-        Self: 'a;
-    fn get_serie(&self, input: &K) -> Option<&Vec<T>>;
-    fn iter(&self) -> Self::Iter<'_>;
+        Self: 'a, K: 'a, T: 'a;
+
+    fn get_serie(&self, input: impl Borrow<K>) -> Option<&Vec<T>>;
+    fn into_iter<'a>(&'a self) -> <Self::IntoIterOuter<'a> as IntoIterator>::IntoIter;
+    
 }
 
 pub trait CreateSeries<K: ?Sized, T, Q>
@@ -45,18 +46,23 @@ impl IdList {
     }
 }
 
-impl Series<str, f64> for IdList {
-    type Iter<'a> = std::collections::hash_map::Iter<'a, String, Vec<f64>>;
-    fn get_serie(&self, input: &str) -> Option<&Vec<f64>> {
+impl Series<String, f64> for IdList {
+
+    type IntoIteratorInner<'a> = &'a Vec<f64>;
+    type IntoIterOuter<'a> = &'a HashMap<String, Vec<f64>>;
+
+
+
+    fn into_iter(&self) -> std::collections::hash_map::Iter<String, Vec<f64>> {
+        (&self.series).into_iter()
+    }
+
+    fn get_serie(&self, input: impl Borrow<String>) -> Option<&Vec<f64>> {
         self.series.get(input.borrow())
     }
 
-    fn iter(&self) -> Self::Iter<'_> {
-        self.series.iter()
-    }
+    
 }
-
-
 
 pub fn parse<R: CreateSeries<K, T, Q>, K, T, Q>(input: &str, _: R) -> Q
 where
@@ -70,10 +76,9 @@ where
 mod tests {
     use std::path::Path;
 
-    use crate::util::{retrive_file, retrive_string};
-    use test::Bencher;
+    use crate::util::{retrive_file};
 
-    use super::{*, id_regex_builder::IdRegexListBuilder, id_nom_builder::IdNomListBuilder};
+    use super::{id_nom_builder::IdNomListBuilder, id_regex_builder::IdRegexListBuilder, *};
 
     #[cfg(test)]
     #[allow(dead_code)]
@@ -106,7 +111,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn simple_test_num() {
         let input = r#"
@@ -126,5 +130,4 @@ mod tests {
             println!("{:?}", i);
         }
     }
-
 }

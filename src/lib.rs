@@ -4,7 +4,6 @@ extern crate test;
 #[macro_use]
 extern crate lazy_static;
 
-use crate::{cli::Cli, mode::dispatch};
 
 
 pub mod cli;
