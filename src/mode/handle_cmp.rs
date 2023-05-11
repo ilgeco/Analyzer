@@ -9,7 +9,7 @@ use super::required_op;
 
 
 
-fn cmp_impl<'a, It, Num>(iter: It, series: impl Series<String, Num>) -> HashMap<&'a String, Option<(Num, Num)>>
+fn cmp_impl<'a, It, Num>(iter: It, series: impl Series<String, Num>) -> HashMap<String, Option<(Num, Num)>>
 where
     It: Iterator<Item = (&'a String, &'a Vec<Num>)>,
     Num : required_op::Operation<'a> + 'a
@@ -33,10 +33,10 @@ where
                 size_e += 1;
             }
             if size_r != 0 && size_e != 0 {
-                res.insert(name, Some(( tot_rel.divu(size_r), tot_err.divu(size_e))));
+                res.insert(name.to_owned(), Some(( tot_rel.divu(size_r), tot_err.divu(size_e))));
 
             }else{
-                res.insert(name, None);
+                res.insert(name.to_owned(), None);
             }
         }
     }
@@ -45,19 +45,19 @@ where
 
 
 
-pub fn handle_cmp(file1: &Path, file2: &Path) {
+pub fn handle_cmp(file1: &Path, file2: &Path) -> HashMap<String, Option<(f64, f64)>> {
     let f_list = parse(&retrive_file(file1), IdNomListBuilder);
     let s_list = parse(&retrive_file(file2), IdNomListBuilder);
 
 
-    let res = cmp_impl(f_list.into_iter(), s_list);
+    cmp_impl(f_list.into_iter(), s_list)
 
     
-    for elem in res.into_iter(){
-        if let (nome, Some((avg, abs))) = elem {
-            println!("{}, {}, {}", nome, avg, abs);
-        }
-    }
+    // for elem in res.into_iter(){
+    //     if let (nome, Some((avg, abs))) = elem {
+    //         println!("{}, {}, {}", nome, avg, abs);
+    //     }
+    // }
 
 }
 

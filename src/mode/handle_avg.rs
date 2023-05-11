@@ -7,7 +7,7 @@ use crate::{
 
 use super::required_op;
 
-fn avg_impl<'a, It, Num>(iter: It) -> HashMap<&'a String, Option<Num>>
+fn avg_impl<'a, It, Num>(iter: It) -> HashMap<String, Option<Num>>
 where
     It: Iterator<Item = (&'a String, &'a Vec<Num>)>,
     Num : required_op::Operation<'a> + 'a
@@ -16,19 +16,19 @@ where
 
     for series in iter {
         let avg = series.1.iter().sum::<Num>().divu(series.1.len());
-        res.insert(series.0, Some(avg));
+        res.insert(series.0.to_owned(), Some(avg));
     }
 
     
     res
 }
-pub fn handle_avg(file1: Option<std::path::PathBuf>) {
+pub fn handle_avg(file1: Option<std::path::PathBuf>) -> HashMap<String, Option<f64>>  {
     let input = retrive_string(file1);
-    let series = parse(&input, IdNomListBuilder);
+    avg_impl(parse(&input, IdNomListBuilder).into_iter())
 
 
-    for (name, avg) in avg_impl(series.into_iter()) {
+    // for (name, avg) in avg_impl(series.into_iter()) {
         
-        println!("{} -> {:e}", name, avg.unwrap())
-    }
+    //     println!("{} -> {:e}", name, avg.unwrap())
+    // }
 }

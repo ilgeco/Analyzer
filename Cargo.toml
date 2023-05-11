@@ -12,6 +12,7 @@ lazy_static = "*"
 terminal-clipboard = "*"
 atty = "*"
 nom = "*"
+ansi_term = "*"
 
 [lib]
 name="libanalyzer"

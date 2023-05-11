@@ -4,6 +4,8 @@ mod handle_avg;
 mod required_op;
 mod handle_cmp;
 
+use std::collections::HashMap;
+
 use handle_range::handle_range;
 use handle_avg::handle_avg;
 use handle_cmp::handle_cmp;
@@ -15,16 +17,23 @@ use crate::{
     util::{retrive_file, retrive_string},
 };
 
+#[derive(Debug)]
+pub enum COMRESULT {
+    RRANGE(HashMap<String, Option<(f64, f64, f64)>>),
+    RAVG(HashMap<String, Option<f64>>),
+    RCMP(HashMap<String, Option<(f64, f64)>>)
+}
 
-pub fn dispatch(mut command: Option<cli::Commands>) {
+
+pub fn dispatch(mut command: Option<cli::Commands>) -> COMRESULT {
     if let None = command {
         command = Some(Commands::new());
     }
 
     match command.unwrap() {
-        Commands::Range { file1 } => handle_range(file1),
-        Commands::Avg { file1 } => handle_avg(file1),
-        Commands::Cmp { file1, file2 } => handle_cmp(file1.as_path(), file2.as_path()),
+        Commands::Range { file1 } => COMRESULT::RRANGE(handle_range(file1)),
+        Commands::Avg { file1 } => COMRESULT::RAVG(handle_avg(file1)),
+        Commands::Cmp { file1, file2 } => COMRESULT::RCMP(handle_cmp(file1.as_path(), file2.as_path())),
     }
 }
 
