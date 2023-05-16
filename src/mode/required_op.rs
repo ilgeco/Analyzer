@@ -13,6 +13,8 @@ where
     fn abs(self) -> Self;
     fn zero() -> Self;
     fn divu(self, rgt : usize) -> Self;
+    fn mulu(self, rgt : usize) -> Self;
+
 }
 
 
@@ -37,5 +39,9 @@ impl<'a> Operation<'a> for f64 {
 
     fn divu(self, rgt: usize) -> Self {
         self / rgt as f64
+    }
+
+    fn mulu(self, rgt : usize) -> Self {
+        self * rgt as f64
     }
 }

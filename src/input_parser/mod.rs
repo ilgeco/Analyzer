@@ -1,6 +1,12 @@
 use std::{borrow::Borrow, collections::HashMap};
+
+use self::config_nom_parser::get_config;
 pub mod id_nom_builder;
 pub mod id_regex_builder;
+mod config_nom_parser;
+
+pub type Recipes = HashMap<String, Vec<Recipe>>;
+
 
 pub trait Series<K: ?Sized, T> {
     type IntoIteratorInner<'a>: IntoIterator<Item = &'a T>
@@ -72,6 +78,38 @@ where
     R::create_series(input)
 }
 
+macro_rules! recipe {
+    ( $($id : ident),+) => {
+        #[derive(Debug,Copy,Clone,Eq,Ord,PartialEq, PartialOrd)]
+        pub enum Recipe{
+            $($id),+
+        }
+
+        #[derive(Debug)]
+        pub enum RecipeResult<T>{
+            $($id(T)),+
+        }
+        
+    };
+}
+
+recipe!(RError,AError,Speed);
+
+
+
+
+
+
+
+
+
+pub fn parse_config(input: &str) -> Recipes {
+    get_config(input)
+}
+
+
+
+
 #[cfg(test)]
 mod tests {
     use std::path::Path;
@@ -124,6 +162,19 @@ mod tests {
         :31.2
         .
         e qui: 23.4
+        come:3.0
+        "#;
+        let series = IdNomListBuilder::create_series(&input);
+        for i in series.series.iter() {
+            println!("{:?}", i);
+        }
+    }
+
+    #[test]
+    fn nomi_strani_num() {
+        let input = r#"
+        nomec0ncara773ri5p3c1al1: 22.4
+        questo_ha!questi&bei!"£$%&//()èùàòcaratter: 22
         "#;
         let series = IdNomListBuilder::create_series(&input);
         for i in series.series.iter() {

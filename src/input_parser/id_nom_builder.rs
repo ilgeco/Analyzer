@@ -6,17 +6,16 @@ use super::{CreateSeries, IdList};
 pub struct IdNomListBuilder;
 
 impl CreateSeries<String, f64, IdList> for IdNomListBuilder {
-    
     fn create_series(mut input: &str) -> IdList {
         let mut res = IdList::new();
-        while let Ok((name,Some((i, num)))) = get_next_id_number(input) {
+        while let Ok((name, Some((i, num)))) = get_next_id_number(input) {
             match res.series.get_mut(name) {
                 Some(serie) => serie.push(num),
                 None => {
                     let mut tmp = Vec::with_capacity(100);
                     tmp.push(num);
                     res.series.insert(name.to_owned(), tmp);
-                },
+                }
             }
             input = i;
         }
@@ -35,8 +34,23 @@ fn get_float(i: &str) -> IResult<&str, f64> {
 }
 
 fn find_possible_start(i: &str) -> IResult<&str, PStart<'_>> {
+    let mut j = 0;
     let init = |x: char| x.is_ascii_digit() || x == ':' || x == '-' || x == '+';
-    let (rgt, lft) = i.split_at_position(init)?;
+
+    let (lft, rgt) = loop {
+        let (rgt, lft) = (&i[j..]).split_at_position(init)?;
+        let last_lft_char = (&i[0 .. j + lft.len()]).chars().rev().next().unwrap_or(' ');
+        if rgt.chars().next().unwrap().is_ascii_digit()
+            && (!last_lft_char.is_ascii_whitespace() && last_lft_char != ':')
+        {
+            let (_, end_lft) = rgt.split_at_position(|x| !x.is_ascii_digit())?;
+            j += end_lft.len();
+            continue;
+        }
+        j += lft.len();
+        break i.split_at(j);
+    };
+
     let o = if rgt.chars().next().unwrap() == ':' {
         let name = lft.split_ascii_whitespace().rev().next().unwrap_or("");
         PStart::Column(name, &rgt[1..])
@@ -62,8 +76,13 @@ fn get_next_id_number(mut i: &str) -> IResult<&str, Option<(&str, f64)>> {
             Ok((i, o)) => return Ok((i, Some(o))),
             Err(x) => match x {
                 nom::Err::Incomplete(_) => return Ok((i, None)),
-                nom::Err::Error(e) | nom::Err::Failure(e) => if e.input.len() > 0 { i = &e.input[1..]} else { return Ok((i,None))},
-                
+                nom::Err::Error(e) | nom::Err::Failure(e) => {
+                    if e.input.len() > 0 {
+                        i = &e.input[1..]
+                    } else {
+                        return Ok((i, None));
+                    }
+                }
             },
         }
     }
@@ -115,11 +134,10 @@ mod test {
         println!("{:?}", try_get_id_number(input));
     }
 
-
     #[test]
     fn get_next_id_test() {
         let input = "casa: 32";
-        
+
         println!("{:?}", get_next_id_number(input));
         let input = ": 32.77coccole";
         println!("{:?}", get_next_id_number(input));
@@ -142,6 +160,9 @@ mod test {
         let input = ":::::::::::::::::::::::::::::::---------------3-----------------------::::::::::::::::::------";
         println!("{:?}", get_next_id_number(input));
         let input = ":::::::::::::::::::::::::44::::::---------------3-----------------------::::::::::::::::::------";
+        println!("{:?}", get_next_id_number(input));
+        let input = "nomec0ncara773ri5p3c1al1: 22.4\ncome:3.0";
+
         println!("{:?}", get_next_id_number(input));
     }
 }

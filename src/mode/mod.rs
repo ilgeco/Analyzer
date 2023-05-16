@@ -13,7 +13,7 @@ use handle_cmp::handle_cmp;
 
 use crate::{
     cli::{self, Commands},
-    input_parser::{id_nom_builder::IdNomListBuilder, parse, Series},
+    input_parser::{id_nom_builder::IdNomListBuilder, parse, Series, RecipeResult},
     util::{retrive_file, retrive_string},
 };
 
@@ -21,7 +21,7 @@ use crate::{
 pub enum COMRESULT {
     RRANGE(HashMap<String, Option<(f64, f64, f64)>>),
     RAVG(HashMap<String, Option<f64>>),
-    RCMP(HashMap<String, Option<(f64, f64)>>)
+    RCMP(HashMap<String, Vec<RecipeResult<f64>>>)
 }
 
 
@@ -33,7 +33,7 @@ pub fn dispatch(mut command: Option<cli::Commands>) -> COMRESULT {
     match command.unwrap() {
         Commands::Range { file1 } => COMRESULT::RRANGE(handle_range(file1)),
         Commands::Avg { file1 } => COMRESULT::RAVG(handle_avg(file1)),
-        Commands::Cmp { file1, file2 } => COMRESULT::RCMP(handle_cmp(file1.as_path(), file2.as_path())),
+        Commands::Cmp { file1, file2, config } => COMRESULT::RCMP(handle_cmp(file1.as_path(), file2.as_path(), config)),
     }
 }
 
