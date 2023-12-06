@@ -1,7 +1,8 @@
 use std::{
     collections::HashMap,
+    fmt::{Debug, Display},
     ops::Sub,
-    path::{Path, PathBuf}, fmt::{Display, Debug},
+    path::{Path, PathBuf},
 };
 
 use crate::{
@@ -39,8 +40,6 @@ where
     let mut res: HashMap<String, Vec<RecipeResult<Num>>> = HashMap::with_capacity(100);
 
     for (name, value) in iter {
-
-
         if let Some(cmp_elems) = series.get_serie(name) {
             let mut tot_err: Num = Num::zero();
             let mut tot_rel = Num::zero();
@@ -53,7 +52,7 @@ where
             for (&base, &cmp) in value.iter().zip(cmp_elems.iter()) {
                 tot_err = tot_err + cmp.sub(base).abs();
 
-                if base != Num::zero() {
+                if base.abs() > Num::small_eps() {
                     tot_rel = tot_rel + cmp.sub(base).div(base.abs()).abs();
                     size_r += 1;
                 }
@@ -61,9 +60,7 @@ where
                 time_s = time_s.add(cmp);
                 size_e += 1;
                 tot += 1;
-
             }
-
 
             for recipe in recipes
                 .get(name)
@@ -74,7 +71,11 @@ where
                 match recipe {
                     Recipe::RError => {
                         if size_r != 0 {
-                            map_insert_or!(res, name, RecipeResult::RError(tot_rel.divu(size_r).mulu(100)));
+                            map_insert_or!(
+                                res,
+                                name,
+                                RecipeResult::RError(tot_rel.divu(size_r).mulu(100))
+                            );
                         }
                     }
                     Recipe::AError => {
@@ -86,7 +87,11 @@ where
                         if tot != 0 {
                             let avg_time_f = time_f.divu(tot);
                             let avg_time_s = time_s.divu(tot);
-                            map_insert_or!(res, name, RecipeResult::Speed(avg_time_f.div(avg_time_s)));
+                            map_insert_or!(
+                                res,
+                                name,
+                                RecipeResult::Speed(avg_time_f.div(avg_time_s))
+                            );
                         }
                     }
                 }

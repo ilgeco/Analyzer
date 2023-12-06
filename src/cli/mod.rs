@@ -20,11 +20,16 @@ pub enum Commands {
     /// Find avg in values
     Avg { file1: Option<PathBuf> },
     /// Cmp two file
-    Cmp { 
-        file1: PathBuf, 
-        file2: PathBuf, 
-        #[arg(short, long)] 
-        config: Option<PathBuf>
+    Cmp {
+        file1: PathBuf,
+        file2: PathBuf,
+        ///     name: TYPE
+        ///     TYPE: RERR | AERR | SPD
+        ///     RERR relative error already multiply by 100
+        ///     AERR absolute error
+        ///     SPD relative speed first/second
+        #[arg(short, long, verbatim_doc_comment)]
+        config: Option<PathBuf>,
     },
 }
 
